@@ -32,22 +32,19 @@ Ans: It's no required, it's totally optional.
 
 
 
-# *Assignment 5*
-
-# *Project Scheduler Queries*
+# *Assignment 5* : *Project Scheduler Queries*
 
 
 
 Release date: 4th October
-
-
 Due date: 16th October
+submission on Moodle.
 
-## Brief description
-This assignment is an extension to the Project Management (Scheduler) part from assignment 4. You are required to perform more complex queries to the scheduler. Details of the commands to be implemented are given below in commands section. (A word about the last command, FLUSH. Suppose a job has sufficient resources but due to its low priority, other jobs with high priority keeps running ahead of it. This would lead job starvation. You give a push to such jobs to run. A way to handle this could be by artificially raising such jobs’ priority.)
+## 1. Brief description
+This assignment is an extension to the Project Management (Scheduler) part from [assignment 4](https://github.com/manoj2601/Data-Structures-Assignments/blob/master/assignment4.pdf). You are required to perform more complex queries to the scheduler. Details of the commands to be implemented are given below in commands section. (A word about the last command, FLUSH. Suppose a job has sufficient resources but due to its low priority, other jobs with high priority keeps running ahead of it. This would lead job starvation. You give a push to such jobs to run. A way to handle this could be by artificially raising such jobs’ priority.)
 
 
-## Scheduler Interfaces
+## 2. Scheduler Interfaces
 You are required to implement the modified scheduler interface mentioned below also attached in ProjectManagement.zip. This is designed to be backward compatible, and an implementation of the original scheduler interface (for Assignment 4) also automatically implements the new interface. Well, almost. You will still need to include the interfaces and default implementations for JobReport_ and UserReport_.
 
 
@@ -56,57 +53,257 @@ Note that new methods in the interface have the timed prefix. These methods will
 
 You may only import java.util.ArrayList, java.util.Stack, and java.util.Queue. (Maps are not allowed for assignment 5. Maps will be allowed for assignment 4 tests only.)
 
+part of the code which ProjectManagement.zip contains:
+````
+package ProjectManagement;
 
+import java.util.ArrayList;
 
+/**
+
+ * DO NOT MODIFY
+
+ */
+
+public interface SchedulerInterface {
+
+    /**
+
+     * @param cmd Handles Project creation. Input is the command from INP1 file in array format (use space to split it)
+
+     */
+
+    void handle_project(String[] cmd);
+
+    /**
+
+     * @param cmd Handles Job creation. Input is the command from INP1 file in array format (use space to split it)
+
+     */
+
+    void handle_job(String[] cmd);
+
+    /**
+
+     * @param name Handles user creation
+
+     */
+
+    void handle_user(String name);
+
+    /**
+
+     * Returns status of a job
+
+     *
+
+     * @param key
+
+     */
+
+    void handle_query(String key);
+
+    /**
+
+     * Next cycle, is executed whenever an empty line is found.
+
+     */
+
+    void handle_empty_line();
+
+    /**
+
+     * Add budget to a project Input is the command from INP1 file in array format (use space to split it)
+
+     *
+
+     * @param cmd
+
+     */
+
+    void handle_add(String[] cmd);
+
+    /**
+
+     * If there are no lines in the input commands, but there are jobs which can be executed, let the system run till there are no jobs left (which can be run).
+
+     */
+
+    void run_to_completion();
+
+    /**
+
+     * After execution is done, print the stats of the system
+
+     */
+
+    void print_stats();
+
+    // Timed queries for the old queries. These are equivalent to their untimed parts.
+
+    // Only they should not print anything so the real code is timed.
+
+    default void timed_handle_user(String name){}
+
+    default void timed_handle_job(String[] cmd){}
+
+    default void timed_handle_project(String[] cmd){}
+
+    default void timed_run_to_completion(){}
+
+    //------------ New queries---------
+
+    /*
+
+     * In the format below, <> enclose parameter.
+
+     * Format: PROJECT <PROJECT> <T1> <T2> =>
+
+     *    Return list of all Jobs for project <PROJECT> arriving at <T1> or later and at <T2> or earlier
+
+     *
+
+     * Format: USER <USER> <T1> <T2>  =>
+
+     *    Return list of all Jobs of user <USER> arriving at <T1> or later and at <T2> or earlier
+
+     *
+
+     * Format: PROJECTUSER <PROJECT> <USER> <T1> <T2>  =>
+
+     *    Return list of all Jobs of user <USER> for project <PROJECT> arriving at <T1> or later and at <T2> or earlier.
+
+     *    This list must be sorted in the order of job completion. Unfinished Jobs come last, and in the order of their arrival.
+
+     *
+
+     * Format: PRIORITY <PRIORITY> =>
+
+     *     Return the list of waiting (unfinished) Jobs with a priority higher than or equal to <PRIORITY>
+
+     *
+
+     */
+
+    default ArrayList<JobReport_> timed_report(String[] cmd){ return null;}
+
+   /*
+
+    * Return the list of top <top> budget consuming users (cumulative usage)
+
+    *    (sorted by consumption first, and then by the user's latest job's completion time)
+
+    *    Note that budget is consumed when the job is finished, not when it is waiting.
+
+    */
+
+    default ArrayList<UserReport_>timed_top_consumer(int top){return null;}
+
+   /*
+
+    * "Prioritize" long waiting jobs: Execute all jobs waiting for <waittime> or longer,
+
+    *    if there is sufficient budget, in the order of their relative priority
+
+    */
+
+    default void timed_flush(int waittime){ }
+
+}
+````
+## 3. Additional Interfaces
+````
+interface JobReport_ {
+
+   default String user(); { return null; }
+
+   default String project_name()  { return null; }
+
+   default int budget()  { return 0; }
+
+   default int arrival_time()  { return 0; }
+
+   default int completion_time() { return 0; }
+
+}
+
+interface UserReport_ {
+
+   default String user();     { return null; }
+
+   default int consumed(); { return 0; }
+
+}
+````
+## 4. Timer
+ Here is one way to time execution of a function.
+ ````
+ public class Timer {
+
+   private long startTime = System.currentTimeMillis();
+
+   private long elapsedTime = 0;
+
+   public void start() { startTime = System.currentTimeMillis(); }
+
+   public long since() { elapsedTime = System.currentTimeMillis() - startTime; return elapsedTime;}
+
+   public long report() { return elapsedTime; }
+
+   public void report(String s) { System.out.println(s + elapsedTime); }
+
+}
+ ````
+ 
 ## 4. Sample input file:
-
-USER Rob
-USER Harry
-USER Carry
-PROJECT IITD.CS.ML.ICML 10 15
-PROJECT IITD.CS.OS.ASPLOS 9 100
-PROJECT IITD.CS.TH.SODA 8 100
-JOB DeepLearning IITD.CS.ML.ICML Rob 10
-JOB ImageProcessing IITD.CS.ML.ICML Carry 10
-JOB Pipeline IITD.CS.OS.ASPLOS Harry 10
-JOB Kmeans IITD.CS.TH.SODA Carry 10
-QUERY Kmeans
-QUERY Doesnotexists
-JOB DeepLearningNoProject IITD.CS.ML.ICM Rob 10
-JOB DeepLearningNoUser IITD.CS.ML.ICML Rob2 10
-JOB DeepLearning1 IITD.CS.ML.ICML Rob 10
-JOB ImageProcessing1 IITD.CS.ML.ICML Carry 10
-JOB Pipeline1 IITD.CS.OS.ASPLOS Rob 10
-JOB Kmeans1 IITD.CS.TH.SODA Carry 10
-JOB DeepLearning2 IITD.CS.ML.ICML Rob 10
-JOB ImageProcessing2 IITD.CS.ML.ICML Carry 10
-JOB Pipeline2 IITD.CS.OS.ASPLOS Harry 10
-JOB Kmeans2 IITD.CS.TH.SODA Carry 10
-ADD IITD.CS.ML.ICML 60
-JOB DeepLearning3 IITD.CS.ML.ICML Rob 10
-JOB ImageProcessing3 IITD.CS.ML.ICML Carry 10
-JOB Pipeline3 IITD.CS.OS.ASPLOS Harry 10
-JOB Kmeans3 IITD.CS.TH.SODA Carry 10
-QUERY Kmeans
-JOB DeepLearning4 IITD.CS.ML.ICML Rob 10
-JOB ImageProcessing4 IITD.CS.ML.ICML Carry 10
-JOB Pipeline4 IITD.CS.OS.ASPLOS Harry 10
-JOB Kmeans4 IITD.CS.TH.SODA Carry 10
-JOB DeepLearning5 IITD.CS.ML.ICML Rob 10
-JOB ImageProcessing5 IITD.CS.ML.ICML Carry 10
-JOB Pipeline5 IITD.CS.OS.ASPLOS Harry 10
-JOB Kmeans5 IITD.CS.TH.SODA Carry 10
-QUERY Kmeans
-NEW_PROJECT IITD.CS.ML.ICML 1 100
-NEW_USER Rob 1 100
-NEW_PROJECTUSER IITD.CS.ML.ICML Rob 1 100
-NEW_PRIORITY 5
-NEW_TOP 4
-NEW_FLUSH 30
-
+````
+    USER Rob
+    USER Harry
+    USER Carry
+    PROJECT IITD.CS.ML.ICML 10 15
+    PROJECT IITD.CS.OS.ASPLOS 9 100
+    PROJECT IITD.CS.TH.SODA 8 100
+    JOB DeepLearning IITD.CS.ML.ICML Rob 10
+    JOB ImageProcessing IITD.CS.ML.ICML Carry 10
+    JOB Pipeline IITD.CS.OS.ASPLOS Harry 10
+    JOB Kmeans IITD.CS.TH.SODA Carry 10
+    QUERY Kmeans
+    QUERY Doesnotexists
+    JOB DeepLearningNoProject IITD.CS.ML.ICM Rob 10
+    JOB DeepLearningNoUser IITD.CS.ML.ICML Rob2 10
+    JOB DeepLearning1 IITD.CS.ML.ICML Rob 10
+    JOB ImageProcessing1 IITD.CS.ML.ICML Carry 10
+    JOB Pipeline1 IITD.CS.OS.ASPLOS Rob 10
+    JOB Kmeans1 IITD.CS.TH.SODA Carry 10
+    JOB DeepLearning2 IITD.CS.ML.ICML Rob 10
+    JOB ImageProcessing2 IITD.CS.ML.ICML Carry 10
+    JOB Pipeline2 IITD.CS.OS.ASPLOS Harry 10
+    JOB Kmeans2 IITD.CS.TH.SODA Carry 10
+    ADD IITD.CS.ML.ICML 60
+    JOB DeepLearning3 IITD.CS.ML.ICML Rob 10
+    JOB ImageProcessing3 IITD.CS.ML.ICML Carry 10
+    JOB Pipeline3 IITD.CS.OS.ASPLOS Harry 10
+    JOB Kmeans3 IITD.CS.TH.SODA Carry 10
+    QUERY Kmeans
+    JOB DeepLearning4 IITD.CS.ML.ICML Rob 10
+    JOB ImageProcessing4 IITD.CS.ML.ICML Carry 10
+    JOB Pipeline4 IITD.CS.OS.ASPLOS Harry 10
+    JOB Kmeans4 IITD.CS.TH.SODA Carry 10
+    JOB DeepLearning5 IITD.CS.ML.ICML Rob 10
+    JOB ImageProcessing5 IITD.CS.ML.ICML Carry 10
+    JOB Pipeline5 IITD.CS.OS.ASPLOS Harry 10
+    JOB Kmeans5 IITD.CS.TH.SODA Carry 10
+    QUERY Kmeans
+    NEW_PROJECT IITD.CS.ML.ICML 1 100
+    NEW_USER Rob 1 100
+    NEW_PROJECTUSER IITD.CS.ML.ICML Rob 1 100
+    NEW_PRIORITY 5
+    NEW_TOP 4
+    NEW_FLUSH 30
+````
 
 ## 5. Sample output file:
-
+````
 Creating user
 Creating user
 Creating user
@@ -320,12 +517,20 @@ Job{user='Carry', project='IITD.CS.ML.ICML', jobstatus=REQUESTED, execution_time
 Job{user='Rob', project='IITD.CS.ML.ICML', jobstatus=REQUESTED, execution_time=10, end_time=null, priority=2147483647, name='DeepLearning3'}
 Total unfinished jobs: 5
 --------------STATS DONE---------------
+````
+## 6. Submission Instructions
+As always compress src directory to zip format and rename the zip file in the format entry number assignment5.zip. For example, if your entry number is 2012CSZ8019, the zip file should be named 2012CSZ8019 assignment5.zip. Then you need to convert this zip file to base64 format as follows and submit the b64 file on Moodle.
+`base64 entrynumber_assignment5.zip > entrynumber_assignment5.zip.b64`
+## 7. Folder Structure
+Inside the src directory, you need to have a README.txt or README.pdf (case sensitive) and your solution (exactly following the folder structure of the code provided in assignment 4.). Please do not rename the existing directories. 
 
+## 8. MOSS
+Please note that we will run MOSS on the submitted code. Anyone found with a copied code, either from the Internet or from another student, will be dealt as per the class policy
 
 ### Note again:
 For the description of the queries : http://web.iitd.ac.in/~anz188059/Assignment5.html
-You have to build your own driver code
-Maps (e.g. HashMap) are not allowed
+- You have to build your own driver code
+- Maps (e.g. HashMap) are not allowed
 
 ### Manoj Kumar
 
